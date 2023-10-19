@@ -103,7 +103,7 @@ function App() {
 
   return (
     <div className="App">
-      {load}    
+      {load} 
     </div>
       );
 }
