@@ -5,21 +5,42 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
       const [listEmpruntsRetard, setListEmpruntsRetard] = useState([])
-      const [isLoaded, setIsLoaded] = useState(false)
+      const [listuserLoan, setListuserLoan] = useState([])
+      const [listTitleByCategory, setListTitleByCategory] = useState([])
+      const [isLoadedCategory, setIsLoadedCategory] = useState(false)
+      const [isLoadedLoan, setIsLoadedLoan] = useState(false)
+      const [isLoadedUser, setIsLoadedUser] = useState(false)
 
     useEffect(() => {
-      ListeEmpruntsRetard();
+      ListeEmpruntsRetard()
+      getUserLoan()
+      getTitleByCategory("Science-fiction")
     }, [])
 
     async function ListeEmpruntsRetard() {
       const listEmpruntsRetard = await axios.get('http://localhost:8000/api/user/get/late/loan/list')
-        .then(res=> {setListEmpruntsRetard(res.data); setIsLoaded(true)} )
+        .then(res=> {setListEmpruntsRetard(res.data); setIsLoadedLoan(true)} )
+        .catch(err => console.log(err))
+    }
+
+    async function getUserLoan() {
+      const listuserLoan = await axios.get('http://localhost:8000/api/user/get/user/by/loan')
+        .then(res=> {setListuserLoan(res.data); setIsLoadedUser(true)} )
+        .catch(err => console.log(err))
+    }
+
+    async function getTitleByCategory(title) {
+      const listTitleByCategory = await axios.get('http://localhost:8000/api/user/get/title/by/category/' + title)
+        .then(res=> {setListTitleByCategory(res.data); setIsLoadedCategory(true)} )
         .catch(err => console.log(err))
     }
 
     let load;
-    if (isLoaded) {
-      load = <div>
+    if (isLoadedLoan && isLoadedUser && isLoadedCategory) {
+      load = <div class="container">
+        
+      <div class="row">
+        <div class="col">
         <table class="table">
           <thead>
             <tr>
@@ -42,15 +63,47 @@ function App() {
           )}
           </tbody>
         </table>
-        </div>;
+        </div>
+        <div class="col">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Nom</th>
+              <th scope="col">Prenom</th>
+            </tr>
+          </thead>
+          <tbody>
+          {listuserLoan.payload.map(loan => {
+          return (
+              <tr>
+                <th>{loan.Nom}</th>
+                <th>{loan.Prenom}</th>
+              </tr>
+            )}
+          )}
+          </tbody>
+        </table>
+        </div>
+        <div>
+          {listTitleByCategory.resultList.map(title => {
+          return (
+              <div>
+                <b>
+                <p>Titre du livre: {title}</p>
+                </b>
+              </div>
+            )}
+          )}
+        </div>
+      </div>
+    </div>;
     } else {
       load = <p></p>;
     }
 
   return (
     <div className="App">
-      {load}
-     
+      {load}    
     </div>
       );
 }
